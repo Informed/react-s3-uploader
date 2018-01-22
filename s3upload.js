@@ -59,6 +59,7 @@ S3Upload.prototype.handleFileSelect = function(files) {
 S3Upload.prototype.createCORSRequest = function(method, url, opts) {
     var opts = opts || {};
     var xhr = new XMLHttpRequest();
+    this.httprequest = xhr;
 
     if (xhr.withCredentials != null) {
         xhr.open(method, url, true);
@@ -91,6 +92,7 @@ S3Upload.prototype.executeOnSignedUrl = function(file, callback) {
     }
     var xhr = this.createCORSRequest(this.signingUrlMethod,
         this.server + this.signingUrl + queryString, { withCredentials: this.signingUrlWithCredentials });
+    this.httprequest = xhr;
     if (this.signingUrlHeaders) {
         var signingUrlHeaders = typeof this.signingUrlHeaders === 'function' ? this.signingUrlHeaders() : this.signingUrlHeaders;
         Object.keys(signingUrlHeaders).forEach(function(key) {
