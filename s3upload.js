@@ -59,7 +59,6 @@ S3Upload.prototype.handleFileSelect = function(files) {
 S3Upload.prototype.createCORSRequest = function(method, url, opts) {
     var opts = opts || {};
     var xhr = new XMLHttpRequest();
-    this.httprequest = xhr;
 
     if (xhr.withCredentials != null) {
         xhr.open(method, url, true);
@@ -92,7 +91,6 @@ S3Upload.prototype.executeOnSignedUrl = function(file, callback) {
     }
     var xhr = this.createCORSRequest(this.signingUrlMethod,
         this.server + this.signingUrl + queryString, { withCredentials: this.signingUrlWithCredentials });
-    this.httprequest = xhr;
     if (this.signingUrlHeaders) {
         var signingUrlHeaders = typeof this.signingUrlHeaders === 'function' ? this.signingUrlHeaders() : this.signingUrlHeaders;
         Object.keys(signingUrlHeaders).forEach(function(key) {
@@ -102,7 +100,9 @@ S3Upload.prototype.executeOnSignedUrl = function(file, callback) {
     }
     xhr.overrideMimeType && xhr.overrideMimeType('text/plain; charset=x-user-defined');
     xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4 && this.signingUrlSuccessResponses.indexOf(xhr.status) >= 0) {
+        if (this.aborted) {
+            this.aborted = false;
+        } else if (xhr.readyState === 4 && this.signingUrlSuccessResponses.indexOf(xhr.status) >= 0) {
             var result;
             try {
                 result = JSON.parse(xhr.responseText);
@@ -115,6 +115,7 @@ S3Upload.prototype.executeOnSignedUrl = function(file, callback) {
             return this.onError('Could not contact request signing server. Status = ' + xhr.status, file);
         }
     }.bind(this);
+    this.httprequest = xhr;
     return xhr.send();
 };
 
@@ -185,6 +186,7 @@ S3Upload.prototype.uploadFile = function(file) {
 
 S3Upload.prototype.abortUpload = function() {
     this.httprequest && this.httprequest.abort();
+    this.aborted = true;
 };
 
 
