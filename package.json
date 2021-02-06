@@ -27,7 +27,7 @@
     "aws-sdk": "2.814.0",
     "create-react-class": "^15.5.2",
     "object-assign": "^2.0.0",
-    "prop-types": "^15.5.8",
+    "prop-types": "^15.7.2",
     "uuid": "^3.1.0"
   }
 }
